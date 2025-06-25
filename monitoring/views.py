@@ -7,8 +7,10 @@ from django.db import connection
 from django.http import HttpResponse
 from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
-import json
 from .models import CardStats
+import json
+
+
 
 def home(request):
     return HttpResponse("Welcome to ClubCard Monitoring!")
@@ -22,11 +24,6 @@ def db_info(request):
 def run_migrate(request):
     call_command('migrate')
     return JsonResponse({"status": "migrated"})
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import json
-from .models import CardStats
 
 @csrf_exempt
 def submit_stats(request):
@@ -53,3 +50,6 @@ def submit_stats(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
+def card_stats_api(request):
+    data = list(CardStats.objects.values())
+    return JsonResponse(data, safe=False)
