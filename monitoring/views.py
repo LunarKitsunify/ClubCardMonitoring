@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from django.db import connection
 from django.http import HttpResponse
 from django.core.management import call_command
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import CardStats
 
 def home(request):
     return HttpResponse("Welcome to ClubCard Monitoring!")
@@ -19,3 +22,34 @@ def db_info(request):
 def run_migrate(request):
     call_command('migrate')
     return JsonResponse({"status": "migrated"})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from .models import CardStats
+
+@csrf_exempt
+def submit_stats(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        cards = data.get("cards", {})
+        is_win = data.get("win", False)
+
+        for name, card_data in cards.items():
+            impact = float(card_data.get("impact", 0))
+
+            obj, _ = CardStats.objects.get_or_create(name=name)
+            obj.games += 1
+            if is_win:
+                obj.wins += 1
+            obj.score += impact
+            obj.save()
+
+        return JsonResponse({"status": "ok"})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
