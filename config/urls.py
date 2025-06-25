@@ -15,10 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from monitoring.views import index_view
 from django.urls import path, include
 
 urlpatterns = [
+    path('', index_view), # Главная страница (может быть HTML-заглушка или redirect)  
     path('admin/', admin.site.urls),
     path('api/', include('monitoring.urls')),
 ]

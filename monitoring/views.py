@@ -8,9 +8,11 @@ from django.http import HttpResponse
 from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
 from .models import CardStats
+from django.shortcuts import render
 import json
 
-
+def index_view(request):
+    return render(request, 'index.html')
 
 def home(request):
     return HttpResponse("Welcome to ClubCard Monitoring!")

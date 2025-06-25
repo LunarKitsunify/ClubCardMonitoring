@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>ClubCard Monitoring</title>
+  <script defer src="{% static 'script.js' %}"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 40px;
+      background: #f7f7f7;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>МОНИТОРИНГ</h1>
+  <table id="stats-table">
+    <thead>
+      <tr>
+        <th>Карта</th>
+        <th>Игры</th>
+        <th>Победы</th>
+        <th>Win Rate (%)</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="5">Загрузка...</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
