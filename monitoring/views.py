@@ -71,6 +71,10 @@ def upload_card_stats(request):
                 if win:
                     obj.wins += 1
                 obj.score += score
+
+                # 🧠 пересчёт impact
+                obj.impact = obj.score / obj.games if obj.games > 0 else 0
+
                 obj.save()
 
             return JsonResponse({'status': 'success'})

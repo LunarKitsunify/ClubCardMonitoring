@@ -5,6 +5,7 @@ class CardStats(models.Model):
     games = models.PositiveIntegerField(default=0)
     wins = models.PositiveIntegerField(default=0)
     score = models.FloatField(default=0.0)
+    impact = models.FloatField(default=0.0)  # 🆕 сохраняем средний impact
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):

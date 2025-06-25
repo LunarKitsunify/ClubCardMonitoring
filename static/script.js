@@ -13,6 +13,7 @@ function updateTable() {
           <td>${card.wins}</td>
           <td>${winrate}</td>
           <td>${card.score.toFixed(1)}</td>
+          <td>${card.impact.toFixed(2)}</td>
         </tr>`;
         tbody.innerHTML += row;
       });
