@@ -1,7 +1,4 @@
 from django.http import JsonResponse
-from django.db import connection
-from django.http import HttpResponse
-from django.core.management import call_command
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 from .models import CardStats
@@ -15,7 +12,7 @@ def card_stats_api(request):
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
 
-@ratelimit(key='ip', rate='1/30s', block=True)
+@ratelimit(key='ip', rate='1/60s', block=True)
 @csrf_exempt
 def upload_card_stats(request):
     if request.method == 'POST':
