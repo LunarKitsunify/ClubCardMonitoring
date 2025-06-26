@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>ClubCard Monitoring</title>
@@ -27,27 +27,40 @@
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
+      cursor: pointer;
     }
     th {
       background-color: #f0f0f0;
     }
+    th:hover {
+      background-color: #e3f0ff;
+      cursor: pointer;
+    }
+    .sort-arrow {
+      font-size: 0.8rem;
+      margin-left: 4px;
+      color: #999;
+    }
+    th.active {
+      background-color: #dfeffc;
+    }
   </style>
 </head>
 <body>
-  <h1>Monitoring</h1>
+  <h1>Cards Statistics</h1>
   <table id="stats-table">
     <thead>
       <tr>
-        <th>Card</th>
-        <th>Game Count</th>
-        <th>Win</th>
-        <th>Win Rate (%)</th>
-        <th>Score</th>
-        <th>Impact</th>
+        <th onclick="sortByColumn(0, false)">Card <span class="sort-arrow" data-col="0">⇅</span></th>
+        <th onclick="sortByColumn(1, true)">Game Count <span class="sort-arrow" data-col="1">⇅</span></th>
+        <th onclick="sortByColumn(2, true)">Win <span class="sort-arrow" data-col="2">⇅</span></th>
+        <th onclick="sortByColumn(3, true)">Win Rate (%) <span class="sort-arrow" data-col="3">⇅</span></th>
+        <th onclick="sortByColumn(4, true)">Score <span class="sort-arrow" data-col="4">⇅</span></th>
+        <th onclick="sortByColumn(5, true)">Impact <span class="sort-arrow" data-col="5">⇅</span></th>
       </tr>
     </thead>
     <tbody>
-      <tr><td colspan="5">Loading...</td></tr>
+      <tr><td colspan="6">Loading...</td></tr>
     </tbody>
   </table>
 </body>
