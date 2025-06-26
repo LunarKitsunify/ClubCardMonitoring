@@ -35,40 +35,49 @@ function renderTable(data) {
 
 function sortByColumn(index, numeric = false) {
   const columnMap = ["name", "games", "wins", "winrate", "score", "impact"];
-
   let key = columnMap[index];
   let ascending = currentSort.column === index ? !currentSort.ascending : false;
 
   let sorted = [...cardData].sort((a, b) => {
-    let aVal, bVal;
-    if (key === "winrate") {
-      aVal = a.games > 0 ? a.wins / a.games : 0;
-      bVal = b.games > 0 ? b.wins / b.games : 0;
-    } else {
-      aVal = a[key];
-      bVal = b[key];
-    }
-
-    if (numeric) {
-      return ascending ? aVal - bVal : bVal - aVal;
-    } else {
-      return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
+    let aVal = key === "winrate" ? (a.games > 0 ? a.wins / a.games : 0) : a[key];
+    let bVal = key === "winrate" ? (b.games > 0 ? b.wins / b.games : 0) : b[key];
+    return numeric
+      ? (ascending ? aVal - bVal : bVal - aVal)
+      : (ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal));
   });
 
   currentSort = { column: index, ascending };
   renderTable(sorted);
 
-  // Обновляем стрелки и стили
   document.querySelectorAll(".sort-arrow").forEach(el => el.textContent = "⇅");
   document.querySelectorAll("th").forEach(el => el.classList.remove("active"));
 
   const arrows = document.querySelectorAll(".sort-arrow");
   const ths = document.querySelectorAll("th");
-
   arrows[index].textContent = ascending ? "↑" : "↓";
   ths[index].classList.add("active");
 }
+
+function applyTheme(theme) {
+  document.documentElement.classList.remove("light-theme", "dark-theme");
+  document.documentElement.classList.add(`${theme}-theme`);
+  localStorage.setItem("theme", theme);
+  document.getElementById("theme-toggle").textContent = theme === "dark" ? "☀️" : "🌙";
+}
+
+function initTheme() {
+  const saved = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? "dark" : "light"));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("dark-theme");
+    applyTheme(isDark ? "light" : "dark");
+  });
+});
 
 updateTable();
 setInterval(updateTable, 60000);

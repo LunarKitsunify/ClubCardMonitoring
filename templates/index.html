@@ -1,16 +1,28 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>ClubCard Monitoring</title>
+
+  <script>
+    (function() {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? "dark" : "light");
+      document.documentElement.classList.add(theme + "-theme");
+    })();
+  </script>
+
   <script defer src="{% static 'script.js' %}"></script>
   <style>
     body {
       font-family: sans-serif;
       margin: 40px;
-      background: #f7f7f7;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    table, th, td {
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     }
     h1 {
       text-align: center;
@@ -29,12 +41,8 @@
       text-align: center;
       cursor: pointer;
     }
-    th {
-      background-color: #f0f0f0;
-    }
     th:hover {
       background-color: #e3f0ff;
-      cursor: pointer;
     }
     .sort-arrow {
       font-size: 0.8rem;
@@ -44,9 +52,51 @@
     th.active {
       background-color: #dfeffc;
     }
+
+    /* Light theme */
+    html.light-theme {
+      background: #f7f7f7;
+      color: #222;
+    }
+    html.light-theme table {
+      background: white;
+    }
+    html.light-theme th {
+      background-color: #f0f0f0;
+    }
+    html.light-theme .sort-arrow {
+      color: #999;
+    }
+
+    /* Dark theme */
+    html.dark-theme {
+      background: #1e1e1e;
+      color: #ddd;
+    }
+    html.dark-theme table {
+      background: #2a2a2a;
+    }
+    html.dark-theme th {
+      background-color: #3a3a3a;
+    }
+    html.dark-theme .sort-arrow {
+      color: #aaa;
+    }
+
+    /* Theme toggle button */
+    #theme-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div style="text-align: right; margin-bottom: 10px;">
+    <button id="theme-toggle">🌙</button>
+  </div>
+
   <h1>Cards Statistics</h1>
   <table id="stats-table">
     <thead>
