@@ -20,6 +20,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', index_view), # Главная страница (может быть HTML-заглушка или redirect)  
-    path('admin/', admin.site.urls),
     path('api/', include('monitoring.urls')),
 ]
