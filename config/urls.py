@@ -22,3 +22,5 @@ urlpatterns = [
     path('', index_view), # Главная страница (может быть HTML-заглушка или redirect)  
     path('api/', include('monitoring.urls')),
 ]
+
+handler404 = 'config.views.custom_404'

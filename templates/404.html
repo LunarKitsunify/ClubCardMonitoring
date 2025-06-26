@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>404 Not Found</title>
+  <style>
+    html.light-theme {
+      background-color: #f7f7f7;
+      color: #222;
+    }
+
+    html.dark-theme {
+      background-color: #1e1e1e;
+      color: #eee;
+    }
+
+    body {
+      margin: 0;
+      padding: 60px 20px;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      font-size: 5rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.5rem;
+    }
+
+    a {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: inherit;
+      text-decoration: underline;
+    }
+  </style>
+  <script>
+    (function() {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? "dark" : "light");
+      document.documentElement.classList.add(theme + "-theme");
+    })();
+  </script>
+</head>
+<body>
+  <h1>404</h1>
+  <p>Page not found.</p>
+  <a href="/">Return to Home</a>
+</body>
+</html>
