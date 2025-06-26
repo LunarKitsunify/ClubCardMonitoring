@@ -26,4 +26,4 @@ function updateTable() {
 }
 
 updateTable();                    // сразу при загрузке
-setInterval(updateTable, 15000);  // и каждые 15 сек
+setInterval(updateTable, 60000);  // и каждые 60 сек
