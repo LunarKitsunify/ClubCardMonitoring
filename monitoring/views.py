@@ -5,6 +5,9 @@ from .models import CardStats
 from django.shortcuts import render
 import json
 
+def real_ip_key(group, request):
+    return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
+
 def index_view(request):
     return render(request, 'index.html')
 
@@ -12,7 +15,7 @@ def card_stats_api(request):
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
 
-@ratelimit(key='ip', rate='1/60s', block=True)
+@ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=True)
 @csrf_exempt
 def upload_card_stats(request):
     if request.method == 'POST':
