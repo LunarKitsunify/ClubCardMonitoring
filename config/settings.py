@@ -147,3 +147,5 @@ MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 #     "https://somegame.com",      # если ты вставляешь код в сторонний сайт
 # ]
 CORS_ALLOW_ALL_ORIGINS = True  # на проде лучше задать конкретные домены!
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
