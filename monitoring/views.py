@@ -1,10 +1,11 @@
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
-from .models import CardStats
 from django.shortcuts import render
 from django.db import transaction
-import json
+from .models import CardStats
+from .models import CardStatsLog
 
 def real_ip_key(group, request):
     return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
@@ -14,6 +15,10 @@ def index_view(request):
 
 def card_stats_api(request):
     data = list(CardStats.objects.values())
+    # data = list(CardStats.objects.values(
+    #     "name", "games", "wins", "score", "impact",
+    #     "played_count", "played_win", "seen_count", "seen_win"
+    # ))
     return JsonResponse(data, safe=False)
 
 @ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=True)
@@ -23,11 +28,24 @@ def upload_card_stats(request):
         try:
             data = json.loads(request.body.decode('utf-8'))
 
+            #=====log raw data
+            ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+            source = request.META.get("HTTP_REFERER") or request.META.get("HTTP_USER_AGENT")
+            CardStatsLog.objects.create(
+                ip_address=ip,
+                source=source,
+                raw_payload=data
+            )
+            #=====
+
             for card in data:
                 name = card.get('name')
                 card_id = card.get('id')
-                score = float(card.get('score', 0))
                 win = bool(card.get('win', False))
+                raw_score = float(card.get('score', 0))
+                score = raw_score if win else -raw_score
+                played = raw_score == 1.0
+                seen = raw_score >= 0.5
 
                 with transaction.atomic():
                     obj, created = CardStats.objects.select_for_update().get_or_create(name=name)
@@ -38,6 +56,15 @@ def upload_card_stats(request):
                     obj.score += score
                     obj.card_id = card_id
                     obj.impact = obj.score / obj.games if obj.games > 0 else 0
+
+                    if played:
+                        obj.played_games += 1
+                        if win:
+                            obj.played_wins += 1
+                    elif seen:
+                        obj.seen_games += 1
+                        if win:
+                            obj.seen_wins += 1
                     obj.save()
 
             return JsonResponse({'status': 'success'})
