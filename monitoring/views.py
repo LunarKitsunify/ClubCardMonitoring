@@ -29,7 +29,9 @@ def upload_card_stats(request):
             data = json.loads(request.body.decode('utf-8'))
 
             #=====log raw data
-            ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+            ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+            ip = ip_raw.split(",")[0].strip() if ip_raw else None
+
             source = request.META.get("HTTP_REFERER") or request.META.get("HTTP_USER_AGENT")
             CardStatsLog.objects.create(
                 ip_address=ip,
