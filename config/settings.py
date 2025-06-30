@@ -144,11 +144,11 @@ INSTALLED_APPS += ['corsheaders']
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 CORS_ALLOWED_ORIGINS = [
-    "https://bondageprojects.elementfx.com/",
-    "https://bondage-europe.com/",
-    "https://www.bondage-europe.com/",
-    "https://bondageprojects.com/",
-    "https://www.bondageprojects.com/"
+    "https://bondageprojects.elementfx.com",
+    "https://bondage-europe.com",
+    "https://www.bondage-europe.com",
+    "https://bondageprojects.com",
+    "https://www.bondageprojects.com"
 ]
 # CORS_ALLOW_ALL_ORIGINS = True  # на проде лучше задать конкретные домены!
 USE_X_FORWARDED_HOST = True
