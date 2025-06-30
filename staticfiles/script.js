@@ -51,9 +51,9 @@ function sortByColumn(index, numeric = false) {
     "games",        // 1
     "wins",         // 2
     "winrate",      // 3
-    "played_count", // 4
+    "played_games", // 4
     "played_wr",    // 5
-    "seen_count",   // 6
+    "seen_games",   // 6
     "seen_wr",      // 7
     "score",        // 8
     "impact"        // 9
