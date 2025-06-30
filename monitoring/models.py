@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.timezone import now
+from django.utils import timezone
 
 class CardStats(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -29,10 +29,17 @@ class CardStats(models.Model):
         return self.name
     
 class CardStatsLog(models.Model):
-    timestamp = models.DateTimeField(default=now)
+    timestamp = models.DateTimeField(default=timezone.now)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    source = models.TextField(null=True, blank=True)  # referrer or User-Agent
+    source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
+    is_processed = models.BooleanField(default=False)
+    result = models.TextField(null=True, blank=True) 
 
     def __str__(self):
         return f"Match log from {self.ip_address or 'unknown'} at {self.timestamp}"
+    
+
+class ProcessingState(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    last_processed_at = models.DateTimeField(default=timezone.now)
