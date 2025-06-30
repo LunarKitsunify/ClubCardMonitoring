@@ -10,15 +10,15 @@ from .models import CardStatsLog
 def real_ip_key(group, request):
     return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
 
+# def real_ip_key(group, request):
+#     ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+#     return ip_raw.split(",")[0].strip() if ip_raw else None
+
 def index_view(request):
     return render(request, 'index.html')
 
 def card_stats_api(request):
     data = list(CardStats.objects.values())
-    # data = list(CardStats.objects.values(
-    #     "name", "games", "wins", "score", "impact",
-    #     "played_count", "played_win", "seen_count", "seen_win"
-    # ))
     return JsonResponse(data, safe=False)
 
 @ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=True)
