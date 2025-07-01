@@ -41,6 +41,9 @@
       text-align: center;
       cursor: pointer;
     }
+    th {
+      border-bottom: 2px solid #aaa;
+    }
     th:hover {
       background-color: #e3f0ff;
     }
@@ -62,10 +65,15 @@
       background: white;
     }
     html.light-theme th {
-      background-color: #f0f0f0;
+      background-color: #e2ecf6;
+      font-weight: bold;
+      border-bottom: 2px solid #aaa;
     }
     html.light-theme .sort-arrow {
       color: #999;
+    }
+    html.light-theme tbody tr:nth-child(odd) {
+      background-color: rgba(0, 0, 0, 0.02);
     }
 
     /* Dark theme */
@@ -77,10 +85,15 @@
       background: #2a2a2a;
     }
     html.dark-theme th {
-      background-color: #3a3a3a;
+      background-color: #444c5e;
+      font-weight: bold;
+      border-bottom: 2px solid #666;
     }
     html.dark-theme .sort-arrow {
       color: #aaa;
+    }
+    html.dark-theme tbody tr:nth-child(odd) {
+      background-color: rgba(255, 255, 255, 0.04);
     }
 
     /* Theme toggle button */
