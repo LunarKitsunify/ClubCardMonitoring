@@ -1,0 +1,26 @@
+Security
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Allowed hosts
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+# Database
+DATABASE_URL=postgres://youruser:yourpass@localhost:5432/yourdb
+
+# Runserver
+python manage.py runserver
+
+# Update Script.js
+python manage.py collectstatic --noinput
+
+# BD model update
+python manage.py makemigrations
+python manage.py makemigrations monitoring
+python manage.py migrate
+
+# Update requirements.txt
+pip freeze > requirements.txt
+
+# Install requirements.txt
+pip install -r requirements.txt
