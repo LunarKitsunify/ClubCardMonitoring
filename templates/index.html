@@ -21,13 +21,12 @@
       margin: 40px;
       transition: background-color 0.3s, color 0.3s;
     }
-    table, th, td {
-      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    }
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 20px;
+    .table-scroll-wrapper {
+      max-height: 80vh;
+      overflow-y: auto;
+      overflow-x: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     table {
       width: 100%;
@@ -45,7 +44,6 @@
       position: sticky;
       top: 0;
       z-index: 2;
-      background-color: inherit;
     }
     th:hover {
       background-color: #e3f0ff;
@@ -99,7 +97,6 @@
       background-color: rgba(255, 255, 255, 0.04);
     }
 
-    /* Theme toggle button */
     #theme-toggle {
       background: none;
       border: none;
@@ -113,25 +110,7 @@
     <button id="theme-toggle">🌙</button>
   </div>
 
-  <h1>Cards Statistics</h1>
-  <table id="stats-table">
-    <thead>
-      <tr>
-        <th onclick="sortByColumn(0, false)">Card <span class="sort-arrow" data-col="0">⇅</span></th>
-        <th onclick="sortByColumn(1, true)">Games <span class="sort-arrow" data-col="1">⇅</span></th>
-        <th onclick="sortByColumn(2, true)">Wins <span class="sort-arrow" data-col="2">⇅</span></th>
-        <th onclick="sortByColumn(3, true)">Win Rate (%) <span class="sort-arrow" data-col="3">⇅</span></th>
-        <th onclick="sortByColumn(4, true)">Played <span class="sort-arrow" data-col="4">⇅</span></th>
-        <th onclick="sortByColumn(5, true)">Played WR (%) <span class="sort-arrow" data-col="5">⇅</span></th>
-        <th onclick="sortByColumn(6, true)">Seen-only <span class="sort-arrow" data-col="6">⇅</span></th>
-        <th onclick="sortByColumn(7, true)">Seen WR (%) <span class="sort-arrow" data-col="7">⇅</span></th>
-        <th onclick="sortByColumn(8, true)">Score <span class="sort-arrow" data-col="8">⇅</span></th>
-        <th onclick="sortByColumn(9, true)">Impact <span class="sort-arrow" data-col="9">⇅</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td colspan="10">Loading...</td></tr>
-    </tbody>
-  </table>
+  <h1 style="text-align: center;">Cards Statistics</h1>
+  {% include "components/stats_table.html" %}
 </body>
 </html>
