@@ -25,7 +25,7 @@ def index_view(request):
 
 def card_stats_api(request):
     """
-    Returns all card statistics as a JSON response.
+    GET - Returns all card statistics as a JSON response.
     """
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)

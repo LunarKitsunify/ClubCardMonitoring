@@ -19,7 +19,7 @@ from monitoring.views import index_view
 from django.urls import path, include
 
 urlpatterns = [
-    path('', index_view), # Главная страница (может быть HTML-заглушка или redirect)  
+    path('', index_view), # Main Page
     path('api/', include('monitoring.urls')),
 ]
 
