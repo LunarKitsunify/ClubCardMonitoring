@@ -60,7 +60,14 @@ function sortByColumn(index, numeric = false) {
   ];
 
   let key = columnMap[index];
-  let ascending = currentSort.column === index ? !currentSort.ascending : false;
+
+  //let ascending = currentSort.column === index ? !currentSort.ascending : false;
+  let ascending =
+  currentSort.column === index
+    ? !currentSort.ascending
+    : numeric
+      ? false
+      : true; 
 
   let sorted = [...cardData].sort((a, b) => {
     let aVal = a[key];
