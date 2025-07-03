@@ -17,6 +17,13 @@ def real_ip_key(group, request):
     return ip_raw.split(",")[0].strip() if ip_raw else None
     # return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
 
+def ratelimit_key_member_number(group, request):
+    try:
+        body = json.loads(request.body)
+        return str(body.get("member_number", ""))
+    except:
+        return ""
+
 def index_view(request):
     """
     Renders the default index.html template.
@@ -30,7 +37,7 @@ def card_stats_api(request):
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
 
-@ratelimit(key='post:member_number', method='POST', rate='1/15s', block=False)
+@ratelimit(key=ratelimit_key_member_number, method='POST', rate='1/15s', block=False)
 @csrf_exempt
 def upload_card_stats(request):
     """
