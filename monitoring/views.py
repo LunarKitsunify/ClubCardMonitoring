@@ -30,7 +30,7 @@ def card_stats_api(request):
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
 
-@ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=False)
+@ratelimit(key='post:member_number', method='POST', rate='1/15s', block=False)
 @csrf_exempt
 def upload_card_stats(request):
     """
@@ -53,7 +53,8 @@ def upload_card_stats(request):
             CardStatsLog.objects.create(
                 ip_address=ip,
                 source=source,
-                raw_payload=data
+                raw_payload=data,
+                member_number=data.get("member_number")
             )
             #=====
 
@@ -83,7 +84,7 @@ def process_cardstats_logs():
 
         try:
             with transaction.atomic():
-                for card in data:
+                for card in data.get("cards", []):
                     name = card.get('name')
                     card_id = card.get('id')
                     win = bool(card.get('win', False))

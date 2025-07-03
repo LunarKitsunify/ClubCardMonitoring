@@ -33,6 +33,7 @@ class CardStatsLog(models.Model):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
+    member_number = models.BigIntegerField(null=True, blank=True)
     is_processed = models.BooleanField(default=False)
     result = models.TextField(null=True, blank=True) 
 
