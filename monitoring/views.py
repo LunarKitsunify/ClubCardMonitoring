@@ -13,9 +13,9 @@ def real_ip_key(group, request):
     Returns the IP address to be used as a rate-limiting key.
     Prioritizes X-Forwarded-For, falls back to REMOTE_ADDR.
     """
-    # ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
-    # return ip_raw.split(",")[0].strip() if ip_raw else None
-    return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
+    ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+    return ip_raw.split(",")[0].strip() if ip_raw else None
+    # return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
 
 def index_view(request):
     """
