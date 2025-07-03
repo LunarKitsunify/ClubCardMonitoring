@@ -30,7 +30,7 @@ def card_stats_api(request):
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
 
-@ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=True)
+@ratelimit(key=real_ip_key, method='POST', rate='1/60s', block=False)
 @csrf_exempt
 def upload_card_stats(request):
     """
@@ -38,6 +38,9 @@ def upload_card_stats(request):
     Logs the payload to CardStatsLog and optionally triggers batch processing
     if thresholds are met (volume or time-based).
     """
+    if getattr(request, 'limited', False):
+        return JsonResponse({'status': 'rate_limited'}, status=200)
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
@@ -58,9 +61,9 @@ def upload_card_stats(request):
 
             return JsonResponse({'status': 'success'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            return JsonResponse({'status': 'error', 'message': str(e)})
 
-    return JsonResponse({'error': 'Only POST allowed'}, status=405)
+    return JsonResponse({'status': 'invalid_method'})
 
 def process_cardstats_logs():
     """
