@@ -33,6 +33,7 @@ class CardStatsLog(models.Model):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
+    game_result = models.BooleanField(null=True)
     member_number = models.BigIntegerField(null=True, blank=True)
     name = models.CharField(max_length=256, null=True, blank=True)
     nickname = models.CharField(max_length=256, null=True, blank=True)

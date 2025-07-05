@@ -61,6 +61,7 @@ def upload_card_stats(request):
                 ip_address=ip,
                 source=source,
                 raw_payload=data,
+                game_result = data.get("game_result"),
                 member_number=data.get("member_number"),
                 name=data.get("name"),
                 nickname=data.get("nickname") 
@@ -92,20 +93,21 @@ def process_cardstats_logs():
             continue
 
         try:
+            game_win = bool(data.get("game_result", False))
+            cards = data.get("cards", [])
             with transaction.atomic():
-                for card in data.get("cards", []):
+                for card in cards:
                     name = card.get('name')
                     card_id = card.get('id')
-                    win = bool(card.get('win', False))
                     raw_score = float(card.get('score', 0))
-                    score = raw_score if win else -raw_score
+                    score = raw_score if game_win else -raw_score
                     played = raw_score == 1.0
                     seen = raw_score >= 0.5
 
                     obj, created = CardStats.objects.select_for_update().get_or_create(name=name)
 
                     obj.games += 1
-                    if win:
+                    if game_win:
                         obj.wins += 1
                     obj.score += score
                     obj.card_id = card_id
@@ -113,11 +115,11 @@ def process_cardstats_logs():
 
                     if played:
                         obj.played_games += 1
-                        if win:
+                        if game_win:
                             obj.played_wins += 1
                     elif seen:
                         obj.seen_games += 1
-                        if win:
+                        if game_win:
                             obj.seen_wins += 1
                     obj.save()
             
