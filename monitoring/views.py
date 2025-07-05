@@ -61,7 +61,9 @@ def upload_card_stats(request):
                 ip_address=ip,
                 source=source,
                 raw_payload=data,
-                member_number=data.get("member_number")
+                member_number=data.get("member_number"),
+                name=data.get("name"),
+                nickname=data.get("nickname") 
             )
             #=====
 

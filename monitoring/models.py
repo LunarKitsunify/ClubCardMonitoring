@@ -34,6 +34,8 @@ class CardStatsLog(models.Model):
     source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
     member_number = models.BigIntegerField(null=True, blank=True)
+    name = models.CharField(max_length=256, null=True, blank=True)
+    nickname = models.CharField(max_length=256, null=True, blank=True)
     is_processed = models.BooleanField(default=False)
     result = models.TextField(null=True, blank=True) 
 
