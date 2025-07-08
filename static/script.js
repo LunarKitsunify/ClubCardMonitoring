@@ -11,8 +11,12 @@ function updateTable() {
         played_wr: card.played_games > 0 ? card.played_wins / card.played_games : 0,
         seen_wr: card.seen_games > 0 ? card.seen_wins / card.seen_games : 0,
       }));
-      renderTable(cardData);
-    })
+
+      if (currentSort.column !== null)
+        sortByColumn(currentSort.column, currentSort.column !== 0);
+      else
+        renderTable(cardData);
+          })
     .catch(err => {
       console.error("Loading error:", err);
       const tbody = document.querySelector("#stats-table tbody");
