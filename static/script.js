@@ -12,11 +12,12 @@ function updateTable() {
         seen_wr: card.seen_games > 0 ? card.seen_wins / card.seen_games : 0,
       }));
 
-      if (currentSort.column !== null)
-        sortByColumn(currentSort.column, currentSort.column !== 0);
-      else
+      if (currentSort.column !== null) {
+        applySort(currentSort.column, currentSort.ascending);
+      } else {
         renderTable(cardData);
-          })
+      }
+    })
     .catch(err => {
       console.error("Loading error:", err);
       const tbody = document.querySelector("#stats-table tbody");
@@ -50,43 +51,37 @@ function renderTable(data) {
 }
 
 function sortByColumn(index, numeric = false) {
+  const ascending =
+    currentSort.column === index
+      ? !currentSort.ascending
+      : numeric
+        ? false
+        : true;
+
+  currentSort = { column: index, ascending };
+  applySort(index, ascending);
+}
+
+function applySort(index, ascending) {
   const columnMap = [
-    "name",         // 0
-    "games",        // 1
-    "wins",         // 2
-    "winrate",      // 3
-    "played_games", // 4
-    "played_wr",    // 5
-    "seen_games",   // 6
-    "seen_wr",      // 7
-    "score",        // 8
-    "impact"        // 9
+    "name", "games", "wins", "winrate",
+    "played_games", "played_wr",
+    "seen_games", "seen_wr", "score", "impact"
   ];
+  const key = columnMap[index];
 
-  let key = columnMap[index];
-
-  //let ascending = currentSort.column === index ? !currentSort.ascending : false;
-  let ascending =
-  currentSort.column === index
-    ? !currentSort.ascending
-    : numeric
-      ? false
-      : true; 
-
-  let sorted = [...cardData].sort((a, b) => {
-    let aVal = a[key];
-    let bVal = b[key];
-    return numeric
+  const sorted = [...cardData].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    return typeof aVal === "number"
       ? (ascending ? aVal - bVal : bVal - aVal)
       : (ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal));
   });
 
-  currentSort = { column: index, ascending };
   renderTable(sorted);
 
   document.querySelectorAll(".sort-arrow").forEach(el => el.textContent = "⇅");
   document.querySelectorAll("th").forEach(el => el.classList.remove("active"));
-
   const arrows = document.querySelectorAll(".sort-arrow");
   const ths = document.querySelectorAll("th");
   arrows[index].textContent = ascending ? "↑" : "↓";
