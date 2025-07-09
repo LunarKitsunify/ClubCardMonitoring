@@ -110,4 +110,3 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 updateTable();
-setInterval(updateTable, 60000);
