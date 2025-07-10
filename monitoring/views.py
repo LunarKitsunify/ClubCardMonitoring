@@ -1,11 +1,15 @@
 import json
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from django.shortcuts import render
 from django.db import transaction
 from .models import CardStats, CardStatsLog, ProcessingState
+from monitoring.utils.processing_meta import is_processing_due, write_next_processing_time
+from monitoring.utils.export_stats import export_cardstats_to_json
+from django.http import FileResponse, JsonResponse
+import os
+from django.conf import settings
 
 
 def real_ip_key(group, request):
@@ -15,7 +19,6 @@ def real_ip_key(group, request):
     """
     ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
     return ip_raw.split(",")[0].strip() if ip_raw else None
-    # return request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR"))
 
 def ratelimit_key_member_number(group, request):
     try:
@@ -36,6 +39,12 @@ def card_stats_api(request):
     """
     data = list(CardStats.objects.values())
     return JsonResponse(data, safe=False)
+
+def card_stats_json(request):
+    path = os.path.join(settings.BASE_DIR, "static", "stats.json")
+    if not os.path.exists(path):
+        return JsonResponse({"error": "stats.json not found"}, status=404)
+    return FileResponse(open(path, "rb"), content_type="application/json")
 
 @ratelimit(key=ratelimit_key_member_number, method='POST', rate='1/15s', block=False)
 @csrf_exempt
@@ -68,7 +77,12 @@ def upload_card_stats(request):
             )
             #=====
 
-            maybe_process_cardstats_logs();
+            if is_processing_due():
+                process_cardstats_logs()
+                export_cardstats_to_json() 
+                write_next_processing_time()
+
+            # maybe_process_cardstats_logs();
 
             return JsonResponse({'status': 'success'})
         except Exception as e:
