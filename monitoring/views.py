@@ -57,28 +57,35 @@ def upload_card_stats(request):
             #=====log raw data
             ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
             ip = ip_raw.split(",")[0].strip() if ip_raw else None
-
+            member = data.get("member_number", "unknown")
             source = request.META.get("HTTP_REFERER") or request.META.get("HTTP_USER_AGENT")
+
+            print(f"[LOG] Received POST from IP {ip}, member {member}")
+
             CardStatsLog.objects.create(
                 ip_address=ip,
                 source=source,
                 raw_payload=data,
                 game_result = data.get("game_result"),
-                member_number=data.get("member_number"),
+                member_number=member,
                 name=data.get("name"),
                 nickname=data.get("nickname") 
             )
             #=====
 
             if is_processing_due():
+                print("[LOG] Triggering processing and JSON export...")
                 process_cardstats_logs()
                 export_cardstats_to_json() 
                 write_next_processing_time()
+            else:
+                print("[LOG] Skipping processing — not due yet")
 
             # maybe_process_cardstats_logs();
 
             return JsonResponse({'status': 'success'})
         except Exception as e:
+            print(f"[ERROR] Failed to handle upload: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'invalid_method'})
