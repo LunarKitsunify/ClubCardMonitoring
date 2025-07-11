@@ -33,13 +33,6 @@ def index_view(request):
     """
     return render(request, 'index.html')
 
-def card_stats_api(request):
-    """
-    GET - Returns all card statistics as a JSON response.
-    """
-    data = list(CardStats.objects.values())
-    return JsonResponse(data, safe=False)
-
 def card_stats_json(request):
     path = os.path.join(settings.BASE_DIR, "static", "stats.json")
     if not os.path.exists(path):

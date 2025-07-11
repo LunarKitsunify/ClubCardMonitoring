@@ -1,9 +1,8 @@
 from django.urls import path
-from .views import card_stats_json
 
 from .views import (
     upload_card_stats,
-    card_stats_api,
+    card_stats_json,
 )
 
 urlpatterns = [
