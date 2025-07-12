@@ -69,8 +69,9 @@ def upload_card_stats(request):
             #     print(f"[BLOCKED] Ignored submission from blocked IP: {ip}")
             #     return JsonResponse({'status': 'blocked', 'reason': 'ip'})
 
-            if member in BLOCKED_MEMBERS:
-                print(f"[BLOCKED] Ignored submission from blocked member: {member}")
+            check_member = str(data.get("member_number", "unknown"))
+            if check_member in BLOCKED_MEMBERS:
+                print(f"[BLOCKED] Ignored submission from blocked member: {check_member}")
                 return JsonResponse({'status': 'blocked', 'reason': 'member'})
 
             CardStatsLog.objects.create(

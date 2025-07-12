@@ -39,12 +39,15 @@ def write_next_processing_time():
 def is_processing_due():
     next_time = read_next_processing_time()
     now_time = now()
-
-    print(f"[LOG] Checking if processing is due:")
-    print(f"[LOG]       Current time: {now_time.isoformat()}")
-    print(f"[LOG]       Next allowed: {next_time.isoformat() if next_time else 'None'}")
-
     due = not next_time or now_time >= next_time
-    print(f"[LOG]       Is due: {due}")
+
+    if due:
+        print(f"[LOG] Processing check — Is due: True")
+    else:
+        delta = next_time - now_time
+        total_seconds = int(delta.total_seconds())
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        print(f"[LOG] Processing check — Is due: False (next in {hours:02}:{minutes:02}:{seconds:02})")
 
     return due
