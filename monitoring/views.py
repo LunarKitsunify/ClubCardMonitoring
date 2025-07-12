@@ -63,7 +63,7 @@ def upload_card_stats(request):
             print(f"[LOG] Received POST from IP {ip}, member {member}")
 
             # BLOCKED_IPS = {"123.123.123.123", "111.111.111.111"}
-            BLOCKED_MEMBERS = {"105930", "107371","209051","181951"}
+            BLOCKED_MEMBERS = {"105930","107371","209051","181951"}
 
             # if ip in BLOCKED_IPS:
             #     print(f"[BLOCKED] Ignored submission from blocked IP: {ip}")

@@ -29,7 +29,10 @@ function renderTable(data) {
   const tbody = document.querySelector("#stats-table tbody");
   tbody.innerHTML = "";
 
-  data.forEach(card => {
+  // Filter out cards with the low_sample flag
+  const visibleCards = data.filter(card => !card.low_sample);
+
+  visibleCards.forEach(card => {
     const winrate = (card.winrate * 100).toFixed(1);
     const playedRate = card.played_games > 0 ? (card.played_wr * 100).toFixed(1) : "-";
     const seenRate = card.seen_games > 0 ? (card.seen_wr * 100).toFixed(1) : "-";
