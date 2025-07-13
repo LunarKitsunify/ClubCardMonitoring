@@ -47,7 +47,6 @@ function renderTable(data) {
       <td>${card.seen_games ?? 0}</td>
       <td>${seenRate ?? 0}</td>
       <td>${card.score.toFixed(1) ?? 0}</td>
-      <td>${card.impact.toFixed(2) ?? 0}</td>
     </tr>`;
     tbody.innerHTML += row;
   });
