@@ -30,7 +30,9 @@ function renderTable(data) {
   tbody.innerHTML = "";
 
   // Filter out cards with the low_sample flag
-  const visibleCards = data.filter(card => !card.low_sample);
+  const visibleCards = data
+  .filter(card => !card.low_sample)
+  .filter(card => card.name !== "Tips");
 
   visibleCards.forEach(card => {
     const winrate = (card.winrate * 100).toFixed(1);

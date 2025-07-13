@@ -35,3 +35,7 @@ Thumbs.db
 
 # Pytest cache
 .pytest_cache/
+
+# Game stats
+stats.json
+processing_meta.json
