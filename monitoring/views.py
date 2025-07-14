@@ -142,13 +142,13 @@ def process_cardstats_logs():
                 continue
 
             # Reject same-IP games (self-play or spoof)
-            # if log1.ip_address == log2.ip_address:
-            #     reason = "duplicate: same IP"
-            #     for log in entries:
-            #         log.is_processed = True
-            #         log.result = reason
-            #         log.save(update_fields=["is_processed", "result"])
-            #     continue
+            if log1.ip_address == log2.ip_address:
+                reason = "duplicate: same IP"
+                for log in entries:
+                    log.is_processed = True
+                    log.result = reason
+                    log.save(update_fields=["is_processed", "result"])
+                continue
 
             # Validate both entries
             valid1, reason1 = validate_card_log(log1)
