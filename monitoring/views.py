@@ -1,16 +1,16 @@
 import json
+import os
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from django.shortcuts import render
 from django.db import transaction
-from .models import CardStats, CardStatsLog, ProcessingState
-from monitoring.utils.processing_meta import is_processing_due, write_next_processing_time
-from monitoring.utils.export_stats import export_cardstats_to_json
 from django.http import FileResponse, JsonResponse
-import os
 from django.conf import settings
-
+from collections import defaultdict
+from .models import CardStats, CardStatsLog, ProcessingState
+from monitoring.utils.export_stats import export_cardstats_to_json
+from monitoring.utils.processing_meta import is_processing_due, write_next_processing_time
 
 def real_ip_key(group, request):
     """
@@ -104,67 +104,115 @@ def upload_card_stats(request):
 
     return JsonResponse({'status': 'invalid_method'})
 
+def validate_card_log(log):
+    """
+    Validates a single log entry before processing.
+    Ensures payload is a list and required fields are present.
+    """
+    if not isinstance(log.raw_payload, list) or not log.raw_payload:
+        return False, "empty or invalid payload"
+    if log.game_result is None or log.member_number is None or log.game_token is None:
+        return False, "missing required fields"
+    return True, "ok"
+
 def process_cardstats_logs():
     """
-    Processes a batch of unprocessed log entries from CardStatsLog.
-    Updates aggregated statistics in CardStats and marks logs as processed.
+    Processes unprocessed entries from CardStatsLog.
+    Entries are grouped by game_token and only valid pairs (2 logs with different IPs and members) are processed.
+    Unpaired logs are either marked as waiting or orphaned.
     """
     logs = CardStatsLog.objects.filter(is_processed=False).order_by('timestamp')
 
+    # Group logs by game_token
+    grouped = defaultdict(list)
     for log in logs:
-        cards = log.raw_payload
+        grouped[log.game_token].append(log)
 
-        if not isinstance(cards, list) or not cards:
-            log.is_processed = True
-            log.result = "empty or invalid"
-            log.save(update_fields=['is_processed', 'result'])
-            continue
+    for token, entries in grouped.items():
+        if len(entries) == 2:
+            log1, log2 = entries
 
-        if log.game_result is None or log.member_number is None or log.game_token is None:
-            log.is_processed = True
-            log.result = "missing required fields"
-            log.save(update_fields=['is_processed', 'result'])
-            continue
+            # Reject self-games (same player)
+            if log1.member_number == log2.member_number:
+                reason = "duplicate: same member"
+                for log in entries:
+                    log.is_processed = True
+                    log.result = reason
+                    log.save(update_fields=["is_processed", "result"])
+                continue
 
-        try:
-            with transaction.atomic():
-                for card in cards:
-                    name = card.get('name')
-                    card_id = card.get('id')
-                    raw_score = float(card.get('score', 0))
-                    score = raw_score if log.game_result else -raw_score
-                    played = raw_score == 1.0
-                    seen = raw_score >= 0.5
+            # Reject same-IP games (self-play or spoof)
+            if log1.ip_address == log2.ip_address:
+                reason = "duplicate: same IP"
+                for log in entries:
+                    log.is_processed = True
+                    log.result = reason
+                    log.save(update_fields=["is_processed", "result"])
+                continue
 
-                    obj, created = CardStats.objects.select_for_update().get_or_create(name=name)
+            # Validate both entries
+            valid1, reason1 = validate_card_log(log1)
+            valid2, reason2 = validate_card_log(log2)
 
-                    obj.games += 1
-                    if log.game_result:
-                        obj.wins += 1
-                    obj.score += score
-                    obj.card_id = card_id
-                    obj.impact = obj.score / obj.games if obj.games > 0 else 0
+            if not valid1 or not valid2:
+                for log in entries:
+                    log.is_processed = True
+                    log.result = f"invalid: {reason1 if not valid1 else reason2}"
+                    log.save(update_fields=["is_processed", "result"])
+                continue
 
-                    if played:
-                        obj.played_games += 1
-                        if log.game_result:
-                            obj.played_wins += 1
-                    elif seen:
-                        obj.seen_games += 1
-                        if log.game_result:
-                            obj.seen_wins += 1
-                    obj.save()
-            
-            log.is_processed = True
-            log.result = "success"
-            log.save(update_fields=['is_processed', 'result'])
+            # Process both valid logs
+            for log in entries:
+                cards = log.raw_payload
+                game_win = bool(log.game_result)
 
-        except Exception as e:
-            log.is_processed = True
-            log.result = f"error: {str(e)}"
-            log.save(update_fields=['is_processed', 'result'])
+                try:
+                    with transaction.atomic():
+                        for card in cards:
+                            name = card.get('name')
+                            card_id = card.get('id')
+                            raw_score = float(card.get('score', 0))
+                            score = raw_score if game_win else -raw_score
+                            played = raw_score == 1.0
+                            seen = raw_score >= 0.5
 
+                            obj, _ = CardStats.objects.select_for_update().get_or_create(name=name)
 
+                            obj.games += 1
+                            if game_win:
+                                obj.wins += 1
+                            obj.score += score
+                            obj.card_id = card_id
+                            obj.impact = obj.score / obj.games if obj.games > 0 else 0
+
+                            if played:
+                                obj.played_games += 1
+                                if game_win:
+                                    obj.played_wins += 1
+                            elif seen:
+                                obj.seen_games += 1
+                                if game_win:
+                                    obj.seen_wins += 1
+                            obj.save()
+
+                    log.is_processed = True
+                    log.result = "success"
+                    log.save(update_fields=["is_processed", "result"])
+
+                except Exception as e:
+                    log.is_processed = True
+                    log.result = f"error: {str(e)}"
+                    log.save(update_fields=["is_processed", "result"])
+
+        elif len(entries) == 1:
+            log = entries[0]
+            if log.result == "wait_for_pair":
+                log.is_processed = True
+                log.result = "orphaned: no pair"
+            else:
+                log.is_processed = True
+                log.result = "wait_for_pair"
+            log.save(update_fields=["is_processed", "result"])
 
 def maybe_process_cardstats_logs():
     """
