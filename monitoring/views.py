@@ -63,7 +63,7 @@ def upload_card_stats(request):
             print(f"[LOG] Received POST from IP {ip}, member {member}")
 
             # BLOCKED_IPS = {"123.123.123.123", "111.111.111.111"}
-            BLOCKED_MEMBERS = {"105930","107371","209051","181951"}
+            BLOCKED_MEMBERS = {"105930","107371"}
 
             # if ip in BLOCKED_IPS:
             #     print(f"[BLOCKED] Ignored submission from blocked IP: {ip}")
@@ -77,8 +77,10 @@ def upload_card_stats(request):
             CardStatsLog.objects.create(
                 ip_address=ip,
                 source=source,
-                raw_payload=data,
+                raw_payload=data.get("cards", []),
                 game_result = data.get("game_result"),
+                game_token=data.get("game_token"),
+                goes_first=data.get("goes_first"),
                 member_number=member,
                 name=data.get("name"),
                 nickname=data.get("nickname") 
@@ -110,30 +112,34 @@ def process_cardstats_logs():
     logs = CardStatsLog.objects.filter(is_processed=False).order_by('timestamp')
 
     for log in logs:
-        data = log.raw_payload
+        cards = log.raw_payload
 
-        if not log.raw_payload:
+        if not isinstance(cards, list) or not cards:
             log.is_processed = True
             log.result = "empty or invalid"
             log.save(update_fields=['is_processed', 'result'])
             continue
 
+        if log.game_result is None or log.member_number is None or log.game_token is None:
+            log.is_processed = True
+            log.result = "missing required fields"
+            log.save(update_fields=['is_processed', 'result'])
+            continue
+
         try:
-            game_win = bool(data.get("game_result", False))
-            cards = data.get("cards", [])
             with transaction.atomic():
                 for card in cards:
                     name = card.get('name')
                     card_id = card.get('id')
                     raw_score = float(card.get('score', 0))
-                    score = raw_score if game_win else -raw_score
+                    score = raw_score if log.game_result else -raw_score
                     played = raw_score == 1.0
                     seen = raw_score >= 0.5
 
                     obj, created = CardStats.objects.select_for_update().get_or_create(name=name)
 
                     obj.games += 1
-                    if game_win:
+                    if log.game_result:
                         obj.wins += 1
                     obj.score += score
                     obj.card_id = card_id
@@ -141,11 +147,11 @@ def process_cardstats_logs():
 
                     if played:
                         obj.played_games += 1
-                        if game_win:
+                        if log.game_result:
                             obj.played_wins += 1
                     elif seen:
                         obj.seen_games += 1
-                        if game_win:
+                        if log.game_result:
                             obj.seen_wins += 1
                     obj.save()
             

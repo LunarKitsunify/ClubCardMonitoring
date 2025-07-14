@@ -34,6 +34,8 @@ class CardStatsLog(models.Model):
     source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
     game_result = models.BooleanField(null=True)
+    game_token = models.CharField(max_length=128, null=True, blank=True)
+    goes_first = models.BooleanField(null=True, blank=True)  
     member_number = models.BigIntegerField(null=True, blank=True)
     name = models.CharField(max_length=256, null=True, blank=True)
     nickname = models.CharField(max_length=256, null=True, blank=True)
