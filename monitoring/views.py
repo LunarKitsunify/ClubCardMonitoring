@@ -210,7 +210,6 @@ def process_cardstats_logs():
                 log.is_processed = True
                 log.result = "orphaned: no pair"
             else:
-                log.is_processed = True
                 log.result = "wait_for_pair"
             log.save(update_fields=["is_processed", "result"])
 
