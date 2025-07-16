@@ -1,5 +1,5 @@
 let cardData = [];
-let currentSort = { column: null, ascending: false };
+let currentSort = { column: 0, ascending: true };
 
 function updateTable() {
   fetch("/api/cardstats/")
@@ -29,17 +29,13 @@ function renderTable(data) {
   const tbody = document.querySelector("#stats-table tbody");
   tbody.innerHTML = "";
 
-  // Filter out cards with the low_sample flag
-  const visibleCards = data
-  .filter(card => !card.low_sample)
-  .filter(card => card.name !== "Tips");
-
-  visibleCards.forEach(card => {
+  data.forEach(card => {
     const winrate = (card.winrate * 100).toFixed(1);
     const playedRate = card.played_games > 0 ? (card.played_wr * 100).toFixed(1) : "-";
     const seenRate = card.seen_games > 0 ? (card.seen_wr * 100).toFixed(1) : "-";
 
     const row = `<tr>
+      <td>${card.index}</td>
       <td>${card.name}</td>
       <td>${card.games}</td>
       <td>${card.wins}</td>
@@ -68,8 +64,8 @@ function sortByColumn(index, numeric = false) {
 
 function applySort(index, ascending) {
   const columnMap = [
-    "name", "games", "wins", "winrate",
-    "played_games", "played_wr",
+    "index", "name", "games", "wins",
+    "winrate", "played_games", "played_wr",
     "seen_games", "seen_wr", "score", "impact"
   ];
   const key = columnMap[index];
