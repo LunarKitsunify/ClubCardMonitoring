@@ -147,7 +147,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://bondage-europe.com",
     "https://www.bondage-europe.com",
     "https://bondageprojects.com",
-    "https://www.bondageprojects.com"
+    "https://www.bondageprojects.com",
+    "https://www.bondage-asia.com"
 ]
 # CORS_ALLOW_ALL_ORIGINS = True  # на проде лучше задать конкретные домены!
 USE_X_FORWARDED_HOST = True
