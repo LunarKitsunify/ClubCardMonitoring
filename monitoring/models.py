@@ -30,7 +30,7 @@ class CardStats(models.Model):
     
 class CardStatsLog(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.TextField( null=True, blank=True)
     source = models.TextField(null=True, blank=True)
     raw_payload = models.JSONField()
     game_result = models.BooleanField(null=True)

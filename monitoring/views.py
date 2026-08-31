@@ -1,5 +1,7 @@
 import json
 import os
+import hashlib
+import hmac
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
@@ -19,6 +21,23 @@ def real_ip_key(group, request):
     """
     ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
     return ip_raw.split(",")[0].strip() if ip_raw else None
+
+def get_ip_hash(request):
+    ip_raw = (
+        request.META.get("HTTP_X_FORWARDED_FOR")
+        or request.META.get("REMOTE_ADDR")
+    )
+
+    if not ip_raw:
+        return None
+
+    ip = ip_raw.split(",")[0].strip()
+
+    return hmac.new(
+        settings.IP_HASH_SECRET.encode(),
+        ip.encode(),
+        hashlib.sha256
+    ).hexdigest()
 
 def ratelimit_key_member_number(group, request):
     try:
@@ -55,27 +74,14 @@ def upload_card_stats(request):
             data = json.loads(request.body.decode('utf-8'))
 
             #=====log raw data
-            ip_raw = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
-            ip = ip_raw.split(",")[0].strip() if ip_raw else None
+            ip_hash = get_ip_hash(request)
             member = data.get("member_number", "unknown")
             source = request.META.get("HTTP_REFERER") or request.META.get("HTTP_USER_AGENT")
 
-            print(f"[LOG] Received POST from IP {ip}, member {member}")
-
-            # BLOCKED_IPS = {"123.123.123.123", "111.111.111.111"}
-            # BLOCKED_MEMBERS = {"105930","107371"}
-
-            # if ip in BLOCKED_IPS:
-            #     print(f"[BLOCKED] Ignored submission from blocked IP: {ip}")
-            #     return JsonResponse({'status': 'blocked', 'reason': 'ip'})
-
-            # check_member = str(data.get("member_number", "unknown"))
-            # if check_member in BLOCKED_MEMBERS:
-            #     print(f"[BLOCKED] Ignored submission from blocked member: {check_member}")
-            #     return JsonResponse({'status': 'blocked', 'reason': 'member'})
+            print(f"[LOG] Received POST from member {member}")
 
             CardStatsLog.objects.create(
-                ip_address=ip,
+                ip_address=ip_hash,
                 source=source,
                 raw_payload=data.get("cards", []),
                 game_result = data.get("game_result"),
@@ -143,7 +149,7 @@ def process_cardstats_logs():
 
             # Reject same-IP games (self-play or spoof)
             if log1.ip_address == log2.ip_address:
-                reason = "duplicate: same IP"
+                reason = "duplicate: same IP_hash"
                 for log in entries:
                     log.is_processed = True
                     log.result = reason

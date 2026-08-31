@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 SECRET_KEY = os.environ["SECRET_KEY"]
+IP_HASH_SECRET = os.environ["IP_HASH_SECRET"]
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ['.onrender.com','127.0.0.1', 'localhost']
