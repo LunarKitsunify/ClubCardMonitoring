@@ -32,30 +32,79 @@ function updateTable() {
     });
 }
 
+// function renderTable(data) {
+//   const tbody = document.querySelector("#stats-table tbody");
+//   tbody.innerHTML = "";
+
+//   data.forEach(card => {
+//     const winrate = (card.winrate * 100).toFixed(1);
+//     const usageRate = (card.usage_rate * 100).toFixed(1);
+//     const playedRate = card.played_games > 0 ? (card.played_wr * 100).toFixed(1) : "-";
+//     const seenRate = card.seen_games > 0 ? (card.seen_wr * 100).toFixed(1) : "-";
+
+//     const row = `<tr>
+//       <td>${card.index}</td>
+//       <td>${card.name}</td>
+//       <td>${card.games}</td>
+//       <td>${usageRate}</td>
+//       <td>${card.wins}</td>
+//       <td>${winrate}</td>
+//       <td>${card.played_games ?? 0}</td>
+//       <td>${playedRate ?? 0}</td>
+//       <td>${card.seen_games ?? 0}</td>
+//       <td>${seenRate ?? 0}</td>
+//       <td>${card.score.toFixed(1) ?? 0}</td>
+//     </tr>`;
+//     tbody.innerHTML += row;
+//   });
+// }
+
 function renderTable(data) {
   const tbody = document.querySelector("#stats-table tbody");
-  tbody.innerHTML = "";
+  tbody.replaceChildren();
 
   data.forEach(card => {
     const winrate = (card.winrate * 100).toFixed(1);
     const usageRate = (card.usage_rate * 100).toFixed(1);
-    const playedRate = card.played_games > 0 ? (card.played_wr * 100).toFixed(1) : "-";
-    const seenRate = card.seen_games > 0 ? (card.seen_wr * 100).toFixed(1) : "-";
 
-    const row = `<tr>
-      <td>${card.index}</td>
-      <td>${card.name}</td>
-      <td>${card.games}</td>
-      <td>${usageRate}</td>
-      <td>${card.wins}</td>
-      <td>${winrate}</td>
-      <td>${card.played_games ?? 0}</td>
-      <td>${playedRate ?? 0}</td>
-      <td>${card.seen_games ?? 0}</td>
-      <td>${seenRate ?? 0}</td>
-      <td>${card.score.toFixed(1) ?? 0}</td>
-    </tr>`;
-    tbody.innerHTML += row;
+    const playedRate =
+      card.played_games > 0
+        ? (card.played_wr * 100).toFixed(1)
+        : "-";
+
+    const seenRate =
+      card.seen_games > 0
+        ? (card.seen_wr * 100).toFixed(1)
+        : "-";
+
+    const score =
+      typeof card.score === "number" && Number.isFinite(card.score)
+        ? card.score.toFixed(1)
+        : "0";
+
+    const values = [
+      card.index,
+      card.name,
+      card.games,
+      usageRate,
+      card.wins,
+      winrate,
+      card.played_games ?? 0,
+      playedRate,
+      card.seen_games ?? 0,
+      seenRate,
+      score,
+    ];
+
+    const row = document.createElement("tr");
+
+    values.forEach(value => {
+      const cell = document.createElement("td");
+      cell.textContent = String(value ?? "");
+      row.appendChild(cell);
+    });
+
+    tbody.appendChild(row);
   });
 }
 
