@@ -106,7 +106,7 @@ def upload_card_stats(request):
             return JsonResponse({'status': 'success'})
         except Exception as e:
             print(f"[ERROR] Failed to handle upload: {str(e)}")
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            return JsonResponse({"status": "error"})
 
     return JsonResponse({'status': 'invalid_method'})
 
