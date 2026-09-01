@@ -257,6 +257,11 @@ def process_cardstats_logs():
             else:
                 log.result = "wait_for_pair"
             log.save(update_fields=["is_processed", "result"])
+        else:
+            for log in entries:
+                log.is_processed = True
+                log.result = "invalid: too many logs for game_token"
+                log.save(update_fields=["is_processed", "result"])
 
 def maybe_process_cardstats_logs():
     """
