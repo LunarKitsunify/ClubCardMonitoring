@@ -72,8 +72,23 @@ def upload_card_stats(request):
     
     if request.method == 'POST':
         try:
+            # Limit total request size to 32 KB to prevent oversized payloads
+            # from unnecessarily consuming database storage.
+            if len(request.body) > 32 * 1024:
+                return JsonResponse({'status': 'payload_too_large'},status=413)
+
             data = json.loads(request.body.decode('utf-8'))
 
+            cards = data.get("cards", [])
+
+            if not isinstance(cards, list):
+                return JsonResponse({'status': 'invalid_cards'},status=400)
+
+            # A valid game log should contain no more than 50 cards.
+            # Reject larger payloads before saving them to CardStatsLog.
+            if len(cards) > 50:
+                return JsonResponse({'status': 'too_many_cards'},status=413)
+            
             #=====log raw data
             ip_hash = get_ip_hash(request)
             member = data.get("member_number", "unknown")
