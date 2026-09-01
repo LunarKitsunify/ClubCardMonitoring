@@ -120,8 +120,10 @@ def validate_card_log(log):
     """
     if not isinstance(log.raw_payload, list) or not log.raw_payload:
         return False, "empty or invalid payload"
-    if log.game_result is None or log.member_number is None or log.game_token is None:
+
+    if ( log.game_result is None or log.goes_first is None or log.member_number is None or log.game_token is None):
         return False, "missing required fields"
+
     return True, "ok"
 
 def process_cardstats_logs():
@@ -169,6 +171,25 @@ def process_cardstats_logs():
                     log.result = f"invalid: {reason1 if not valid1 else reason2}"
                     log.save(update_fields=["is_processed", "result"])
                 continue
+
+            # Both players cannot have the same game result
+            if log1.game_result == log2.game_result:
+                reason = "invalid: inconsistent game_result"
+                for log in entries:
+                    log.is_processed = True
+                    log.result = reason
+                    log.save(update_fields=["is_processed", "result"])
+                continue
+
+            # Only one player can go first
+            if log1.goes_first == log2.goes_first:
+                reason = "invalid: inconsistent goes_first"
+                for log in entries:
+                    log.is_processed = True
+                    log.result = reason
+                    log.save(update_fields=["is_processed", "result"])
+                continue
+
 
             # Process both valid logs
             for log in entries:
