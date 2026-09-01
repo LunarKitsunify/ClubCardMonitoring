@@ -58,7 +58,8 @@ def card_stats_json(request):
         return JsonResponse({"error": "stats.json not found"}, status=404)
     return FileResponse(open(path, "rb"), content_type="application/json")
 
-@ratelimit(key=ratelimit_key_member_number, method='POST', rate='1/15s', block=False)
+@ratelimit(key=real_ip_key, method='POST', rate='1/10s', block=False)
+@ratelimit(key=ratelimit_key_member_number, method='POST', rate='1/10s', block=False)
 @csrf_exempt
 def upload_card_stats(request):
     """
@@ -67,7 +68,7 @@ def upload_card_stats(request):
     if thresholds are met (volume or time-based).
     """
     if getattr(request, 'limited', False):
-        return JsonResponse({'status': 'rate_limited'}, status=200)
+        return JsonResponse({'status': 'rate_limited'}, status=429)
     
     if request.method == 'POST':
         try:
@@ -104,11 +105,13 @@ def upload_card_stats(request):
             # maybe_process_cardstats_logs();
 
             return JsonResponse({'status': 'success'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'invalid_json'}, status=400)
         except Exception as e:
             print(f"[ERROR] Failed to handle upload: {str(e)}")
-            return JsonResponse({"status": "error"})
+            return JsonResponse({"status": "error"}, status=500)
 
-    return JsonResponse({'status': 'invalid_method'})
+    return JsonResponse({'status': 'invalid_method'}, status=405)
 
 def validate_card_log(log):
     """
